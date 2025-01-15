@@ -1,14 +1,15 @@
 import classNames from "classnames";
 import { useRouter } from "next/router";
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import tw from "twin.macro";
 import { sidebarContent } from "../data/sidebar";
 import { Link } from "./Link";
 import { Logo } from "./Logo";
-import { ISidebarSection } from "@/types";
 import { ScrollArea } from "./ScrollArea";
 import { OpenSearchModalButton } from "@/components/Search";
 import { ThemeSwitcher } from "./ThemeSwitcher";
+import { IPage, ISubSection, IExternalLink, ISidebarSection } from "../types";
+import SidebarItem from "./SidebarItem";
 
 export const Sidebar: React.FC = ({ ...props }) => {
   return (
@@ -55,11 +56,85 @@ const SidebarContent: React.FC = () => {
     [slug],
   );
 
+  const [expandedSubSections, setExpandedSubSections] = useState<string[]>([]); 
+
+  useEffect(() => {
+    const newExpandedSubSections = findContainingSubSectionSlugs(sidebarContent, prefixedSlug ?? pathname);
+    setExpandedSubSections(prevExpandedSubSections =>Array.from(new Set([...prevExpandedSubSections, ...newExpandedSubSections])));
+  }, [prefixedSlug]);
+  
+
+  const findContainingSubSectionSlugs = (sections: ISidebarSection[], currentPageSlug: string): string[] => {
+    let slugs: string[] = [];
+    for (const section of sections) {
+      for (const item of section.content) {
+        if ('subTitle' in item) {
+          const subTitleSlug = typeof item.subTitle === 'string' ? item.subTitle : item.subTitle.slug;
+          if (item.pages.some(p => 'slug' in p && p.slug === currentPageSlug) || subTitleSlug === currentPageSlug) {
+            slugs.push(subTitleSlug);
+          }
+        }
+      }
+    }
+    return slugs;
+  }; 
+  
   const isCurrentPage = (pageSlug: string) =>
     (prefixedSlug ?? pathname) === pageSlug;
 
-  const isCurrentSection = (section: ISidebarSection) =>
-    section.pages.some(p => isCurrentPage(p.slug));
+  const isCurrentSection = (section: ISidebarSection ) => {
+    const isDirectPageCurrent = section.content.some(item => 'slug' in item && isCurrentPage(item.slug));
+
+    const isSubTitlePageCurrent = section.content.some(item => {
+      if ('subTitle' in item) {
+        const subTitleSlug = typeof item.subTitle === 'string' ? item.subTitle : item.subTitle.slug;
+        return isCurrentPage(subTitleSlug);
+      }
+      return false;
+    });
+
+    const isSubSectionPageCurrent = section.content.some(item => 
+      'subTitle' in item && item.pages.some(page => 'slug' in page && isCurrentPage(page.slug))
+    );
+
+    return isDirectPageCurrent || isSubTitlePageCurrent || isSubSectionPageCurrent;
+  };
+    
+  const toggleSubSection = (subTitleSlug: string, isDirectToggle:boolean = false) => {
+    setExpandedSubSections(prevState => {
+      if (isDirectToggle) {
+        // Direct toggle when SVG icon is clicked
+        return prevState.includes(subTitleSlug) 
+          ? prevState.filter(slug => slug !== subTitleSlug)
+          : [...prevState, subTitleSlug];
+      } else {
+        // Expand the clicked top-level section if it's not already expanded
+        return prevState.includes(subTitleSlug) ? prevState : [...prevState, subTitleSlug];
+      }
+    });
+  };
+  
+  const renderContentItem = (item: IPage | ISubSection | IExternalLink) => {
+    let itemSlug = '';
+
+    if ('slug' in item) {
+      itemSlug = item.slug;
+     } else if ('subTitle' in item) {
+      itemSlug = typeof item.subTitle === 'string' ? item.subTitle : item.subTitle.slug;
+     } else if ('url' in item) {
+      itemSlug = item.url;
+     };
+    
+    return (
+      <SidebarItem
+        key={itemSlug}
+        item={item}
+        isCurrentPage={isCurrentPage}
+        isExpanded={expandedSubSections.includes(itemSlug)}
+        onToggleSubSection={(isDirectToggle) => toggleSubSection(itemSlug, isDirectToggle)}
+      />
+    );
+  };
 
   return (
     <>
@@ -77,24 +152,7 @@ const SidebarContent: React.FC = () => {
           )}
 
           <ul tw="mb-8">
-            {section.pages.map(page => (
-              <li key={page.slug}>
-                <Link
-                  href={page.slug}
-                  className={classNames(isCurrentPage(page.slug) && `current`)}
-                  css={[
-                    tw`text-gray-700 text-sm`,
-                    tw`block px-4 py-2`,
-                    tw`hover:bg-gray-100 hover:text-foreground`,
-                    tw`focus:outline-none focus:bg-pink-100`,
-                    isCurrentPage(page.slug) &&
-                      tw`bg-pink-100 text-pink-900 hover:bg-pink-100 border-r-2 border-pink-500`,
-                  ]}
-                >
-                  {page.title}
-                </Link>
-              </li>
-            ))}
+            {section.content.map(renderContentItem)}
           </ul>
         </React.Fragment>
       ))}

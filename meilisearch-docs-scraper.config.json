@@ -1,10 +1,9 @@
 {
   "index_uid": "docs_railway_app_production",
-  "stop_urls": [
-    "https://docs.railway.app/getting-started"
-  ],
-  "sitemap_urls": [
-    "https://docs.railway.app/sitemap.xml"
+  "start_urls": [
+    {
+      "url": "https://docs.railway.com/"
+    }
   ],
   "js_render": false,
   "scrape_start_urls": false,
@@ -18,7 +17,7 @@
     "lvl2": ".docs-content h2",
     "lvl3": ".docs-content h3",
     "lvl4": ".docs-content h4",
-    "text": ".docs-content p, .docs-content li, .docs-content a"
+    "text": ".docs-content p, .docs-content li, .docs-content a, .docs-content code, .docs-content td, .docs-content pre"
   },
   "strip_chars": " .,;:#",
   "custom_settings": {

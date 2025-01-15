@@ -1,12 +1,12 @@
 # 📚 Railway Documentation
 
-Visit [docs.railway.app](https://docs.railway.app)
+Visit [docs.railway.com](https://docs.railway.com)
 
-![og](https://railway.app/og.png)
+![og](https://railway.com/og.png)
 
 ## 💡 About
 
-This is the place where all the documentation about Railway is hosted. Contributions are welcome! Change the markdown, make a pull request, and we'll merge it! Deploys will happen automagically cause the docs are hosted on Railway.
+This is the place where all the documentation about Railway is hosted. Contributions are welcome! Change the markdown, make a pull request, and we'll merge it! Deploys will happen automagically cause the docs are hosted on Railway
 
 ## 🧑‍🔬 Contributing
 

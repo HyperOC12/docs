@@ -1,16 +1,15 @@
 ---
 title: Teams
+description: Learn how you can manage a team within Railway.
 ---
 
-Teams are how organizations are represented within Railway. Teams with a valid credit card attached are subscribed to the Team plan. Projects within the Team plan get generous limits on service caps such as 32 GB of RAM and 32 vCPU cores.
+Teams are how organizations are represented within Railway. Teams can be created via the Pro or Enterprise plans.
 
-Team plans cost $20 per seat plus get billed for any service usage within their projects, for more information see our [pricing page](https://railway.app/pricing). Team
+For more information, visit our [documentation on pricing](/reference/pricing) or <a href="https://railway.com/pricing" target="_blank">railway.com/pricing</a>.
 
 ## Creating a Team
 
-Organizations can create a team by heading to the [Create Team](https://railway.app/new/team) page and entering the required information.
-
-After the team creation, you will be prompted to enter the team's billing information.
+Organizations can create a team by heading to the <a href="https://railway.com/new/team" target="_blank">Create Team</a> page and entering the required information.
 
 ## Managing Teams
 
@@ -18,25 +17,40 @@ You can open your team's settings page to manage team members and see billing in
 
 ## Inviting Members
 
-Under the General tab of the settings page, you can invite members to access the project.
+Under the People tab of the settings page, you can invite members to access the project.
 
-There are two scopes for Team members
+There are three roles for Team members:
 
-- Admin: full administration of the Team and all Team projects
-- Member: access to all team projects
+- Admin: Full administration of the Team and all Team projects
+- Member: Access to all Team projects
+- Deployer: View projects and deploy through commits to repos via github integration.
 
-## Transferring Projects to Teams
+*Note*: Changes that trigger a deployment will skip the approval requirement when the author has a Deployer role (or higher) and their Github account is connected.
 
-In the Dashboard you can click and drag projects into the team. Just click and hold the handle icon on the project on the dashboard, you will see a drag interface appear, then you can let go of the mouse click in the desired team.
+## Trusted Domains
+Trusted domains may be configured on the team settings page. Note that team members added via trusted domain will be billed at the normal rate.
 
-## Priority Email Support
+<Image 
+    src="https://res.cloudinary.com/railway/image/upload/v1733955730/docs/t-d_jbtbm7.png"
+    width="600"
+    height="300"
+    alt="Trusted domains are configurable via the team settings"
+/>
 
-If you are on the Teams plan, you can reach out to us via email at contact@railway.app for support.
+You can automate the onboarding of new team members with trusted domains. Railway users that sign up with one of the trusted domains associated with your team will automatically be granted access to the team with the specified role (see above).
+
+For example, new users with `example.com` email addresses will automatically be added to your teams that have the `example.com` trusted domain.
+
+We verify that you have administrative access to the domain by looking for services in your team that use this domain or a subdomain. Make sure to [setup a custom domain](/guides/public-networking#custom-domains) on your service before adding it as a trusted domain.
+
+## Transferring Projects
+
+Transfer projects from another Team or Hobby workspace easily.  Detailed instructions can be found [here](/guides/projects#transferring-projects).
 
 ## Invoicing and Billing
 
-Railway offers a consumption-based pricing model for your projects. You don't get charged for resources you don't use, instead, Railway charges by the minute for each vCPU and memory resource your service uses. 
+Railway offers a consumption-based pricing model for your projects. You don't get charged for resources you don't use, instead, Railway charges by the minute for each vCPU and memory resource your service uses.
 
 However, if you expect to use a consistent amount of resources for large companies, you can contact us for a quote and demo. Railway will work with you to find a solution that works for your needs. We are willing to offer Purchase Orders and concierge onboarding for large companies.
 
-Reach out to us at contact@railway.app for more information.
+Reach out to us at [team@railway.com](mailto:team@railway.com) for more information.

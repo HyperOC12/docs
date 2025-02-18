@@ -1,0 +1,5 @@
+query thread($slug: String!) {
+  thread(slug: $slug) {
+    replyCount
+  }
+}

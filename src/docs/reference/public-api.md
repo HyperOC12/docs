@@ -1,117 +1,72 @@
 ---
 title: Public API Reference
+description: Learn about the Railway GraphQL Public API.
 ---
 
-<PriorityBoardingBanner />
-
-The Railway public API is built with GraphQL and is the same API that powers the Railway dashboard. You can play around with the API right inside your browser with the [GraphiQL playground](https://railway.app/graphiql). Continue reading to learn more about the API and see some examples of the API in use.
+The Railway public API is built with GraphQL and is the same API that powers the Railway dashboard.
 
 ## Endpoint
 
-```bash
-https://backboard.railway.app/graphql/v2
-```
+The public API is accessible at the following endpoint:
 
-The Railway API supports introspection so you should be able to use popular tools like [Postman](https://www.postman.com/) or [Insomnia](https://insomnia.rest/) to query the schema.
+```bash
+https://backboard.railway.com/graphql/v2
+```
 
 ## Authentication
 
-To use the API, you will need an API token. You can create one by visiting the [tokens page](https://railway.app/account/tokens) in your account settings. There are two types of tokens you can create.
+To use the API, you will need an API token. There are three types of tokens you can create.
 
-<Image src="https://res.cloudinary.com/railway/image/upload/v1667386744/docs/new-token-form_rhrbw8.png"
-alt="New token form"
-layout="responsive"
-width={1618 } height={378} quality={80} />
+#### Team Token and Personal Token
 
-### Team token
+You can create an API token by visiting the <a href="https://railway.com/account/tokens" target="_blank">tokens page</a> in your account settings.
 
-If you select a `Team` in the dropdown in the image above, the token will be tied to that team and will have access to all the team's resources. This token cannot be used to access your personal resources on Railway so feel free to share it with your teammates.
-
-### Personal token
-
-If you do not select a `Team`, the token will be tied to your Railway account and will have access to all your resources. Do not share this token with anyone else.
-
----
-
-Once you have your token, you can pass it within the `Authorization` header of your request.
+- **Team tokens** are tied to a team and will have access to all the team's resources. This token cannot be used to access your personal resources on Railway so feel free to share it with your teammates.
+- **Non-team tokens** will be tied to your Railway account and will have access to all your resources. Do not share this token with anyone else.
 
 ```bash
 curl --request POST \
-  --url https://backboard.railway.app/graphql/v2 \
+  --url https://backboard.railway.com/graphql/v2 \
   --header 'Authorization: Bearer <API_TOKEN_GOES_HERE>' \
   --header 'Content-Type: application/json' \
-  --data '{"query":"query { templates { edges { node { id code } } } }"}'
+  --data '{"query":"query { me { name email } }"}'
 ```
 
-## Examples
+#### Project Token
 
-To help you get started, here are a few examples for reference.
+You can create a project token by visiting the tokens page in your project settings.
 
-### `project` Query
+Project tokens are scoped to a specific environment within a project and can only be used to authenticate requests to that environment.
 
-The query below will fetch the project with the specified `id` along with all the plugins, environments, and services for it. Additionally, for each service, it will fetch all the deployments associated with it.
-
-```graphql
-query project {
-  project(id: "fd92dedc-8a09-42b1-9388-8c7142057a53") {
-    id
-    name
-    plugins {
-      edges {
-        node {
-          id
-          name
-        }
-      }
-    }
-    environments {
-      edges {
-        node {
-          id
-          name
-        }
-      }
-    }
-    services {
-      edges {
-        node {
-          id
-          name
-          deployments {
-            id
-            status
-          }
-        }
-      }
-    }
-  }
-}
+```bash
+curl --request POST \
+  --url https://backboard.railway.com/graphql/v2 \
+  --header 'Project-Access-Token: <PROJECT_TOKEN_GOES_HERE>' \
+  --header 'Content-Type: application/json' \
+  --data '{"query":"query { projectToken { projectId environmentId } }"}'
 ```
 
-### `pluginCreate` Mutation
+## Schema
 
-The mutation below will add the `redis` plugin to an existing project and the response will contain the `id` of the newly created plugin.
+The Railway API supports introspection meaning you can use popular tools like [Postman](https://www.postman.com/) or [Insomnia](https://insomnia.rest/) to query the schema.  Simply set up your connection with the endpoint and Authorization token, and fetch the schema.
 
-```graphql
-mutation pluginCreate {
-  pluginCreate(
-    input: {
-      data: {
-        name: "redis"
-        projectId: "a9f2c2a3-ce89-48e4-9174-2d9874beb966z"
-      }
-    }
-  ) {
-    plugin {
-      id
-    }
-  }
-}
+### API Collection File
+
+We provide a collection file which can be imported into your preferred API client.  Once imported, you should only need to add your API token to get connected and start executing queries in the collection. Click [here](https://gql-collection-server.up.railway.app/railway_graphql_collection.json) to download it.
+
+### GraphiQL Playground
+
+Use our [GraphiQL playground](https://railway.com/graphiql) to view the schema and test your queries.
+
+Make sure to set an Authorization header with an [auth token](/reference/public-api#authentication). Click the "Headers" tab at the bottom of the GraphiQL page and enter this json, using your own token:
+
+```json
+{"Authorization": "Bearer <API_TOKEN_GOES_HERE>"}
 ```
 
 ## Rate Limits
 
-In order to protect the Railway API from spam and misusage, we have established some basic rate limits. The current limit is **1000** requests per **day** to the API. To help you keep track of your usage, Railway sends a few headers with the response on each request.
+In order to protect the Railway API from spam and misusage, we have established some basic rate limits. The current limit is **1000** requests per **hour** to the API. To help you keep track of your usage, Railway sends a few headers with the response on each request.
 
 | Header                | Description                                                                                                                                        |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -121,5 +76,7 @@ In order to protect the Railway API from spam and misusage, we have established 
 | Retry-After           | The amount of time after which you can make another request. This header is only sent once you've used up all your requests in the current window. |
 
 ## Support
+
+For more information on how to use the Public API and for examples of queries, view the [Public API guide](/guides/public-api).
 
 If you run into problems using the API or have any suggestions, feel free to join our [Discord server](https://discord.gg/railway) where you can interact with the engineers working on the API directly.

@@ -1,4 +1,5 @@
 import React, { PropsWithChildren } from "react";
+import { iconFromName } from "@/utils/icon";
 import {
   AlertTriangle,
   CheckCircle,
@@ -23,7 +24,10 @@ const defaultVariant: BannerVariant = "primary";
 export interface Props {
   variant?: BannerVariant;
   icon?: React.ComponentType;
+  iconName?: string;
   hideIcon?: boolean;
+  className?: string;
+  textContainerStyles?: TwStyle;
 }
 
 const containerStyles: Record<BannerVariant, TwStyle> = {
@@ -56,25 +60,36 @@ const defaultIcons: Record<BannerVariant, React.ComponentType | null> = {
 export const Banner: React.FC<PropsWithChildren<Props>> = ({
   children,
   hideIcon,
+  textContainerStyles,
   ...props
 }) => {
   const variant = props.variant ?? defaultVariant;
-  const icon = props.icon ?? defaultIcons[variant];
+  const icon = props.iconName
+    ? iconFromName(props.iconName)
+    : props.icon ?? defaultIcons[variant];
 
   return (
     <div
       css={[
-        tw`flex items-start px-3 border rounded-md`,
+        tw`flex items-center py-3 px-4 border rounded-md space-x-3`,
         containerStyles[variant],
       ]}
       className="banner"
       {...props}
     >
       {!hideIcon && icon != null && (
-        <Icon tw="mt-6 mr-3" icon={icon} css={[iconStyles[variant]]} />
+        <Icon tw="mx-1" icon={icon} css={[iconStyles[variant]]} />
       )}
-
-      <>{children}</>
+      <div
+        css={[
+          {
+            "> p": tw`my-2`,
+          },
+          textContainerStyles,
+        ]}
+      >
+        {children}
+      </div>
     </div>
   );
 };
@@ -82,11 +97,14 @@ export const Banner: React.FC<PropsWithChildren<Props>> = ({
 export const PriorityBoardingBanner: React.FC = () => {
   return (
     <Banner variant="primary" icon={Star}>
-      <p>
-        This feature is only available to&nbsp;
-        <Link href="/reference/priority-boarding">Priority Boarding</Link>
-        &nbsp;members.
-      </p>
+      This feature is in beta. You can enable it from your&nbsp;
+      <Link
+        href="/reference/priority-boarding"
+        className="underline hover:opacity-60"
+      >
+        account settings
+      </Link>
+      &nbsp;page.
     </Banner>
   );
 };

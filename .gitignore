@@ -1,6 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 .env
+package-lock.json
 
 # dependencies
 /node_modules
@@ -42,3 +43,6 @@ yarn-error.log*
 public/sitemap*.xml
 public/robots.txt
 .contentlayer
+
+/.envrc
+/.direnv/

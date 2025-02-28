@@ -1,98 +1,70 @@
 import { Banner, PriorityBoardingBanner } from "@/components/Banner";
+import { Collapse } from "@/components/Collapse";
 import { CodeBlock } from "@/components/CodeBlock";
 import Layout from "@/mdxLayouts/index";
 import { allPages, Page } from "contentlayer/generated";
-import { GetStaticPaths, GetStaticProps } from "next";
 import { useMDXComponent } from "next-contentlayer/hooks";
-import { default as NextImage, ImageProps } from "next/legacy/image";
 import Link from "next/link";
-import { Link as FeatherLinkIcon } from "react-feather";
-import styled from "styled-components";
-
-const StyledLinkIcon = styled.a`
-  text-decoration: none;
-  position: absolute;
-  width:3rem;
-  height:2rem;
-  display:none;
-  align-items:center;
-  left: -2rem;
-  &:hover {
-      text-decoration:underline;
-  }
-`;
-
-const StyledLinkHeading = styled.a`
-  text-decoration: none;
-  position: absolute;
-  font-weight:bold;
-  &:hover {
-      text-decoration:underline;
-  }
-`;
-
-const StyledHeadingH2 = styled.h2`
-  display: flex;
-  align-items: center;
-  position: relative;
-  padding: 1.5rem 0 0;
-  &:hover{
-      ${StyledLinkIcon}{
-        display:flex;
-      }
-      @media (max-width: 1300px) {
-       ${StyledLinkIcon}{
-        display: none;
-    }
-  }
-`;
-
-const Image = (props: ImageProps) => (
-  <a
-    tw="block xl:-mx-8"
-    href={props.src as string}
-    target="_blank"
-    rel="noopener"
-  >
-    <NextImage {...props} />
-  </a>
-);
+import { Image } from "@/components/Image";
+import { InlineCode } from "@/components/InlineCode";
+import { H2, H3, H4 } from "@/components/Header";
+import { Anchor } from "@/components/Anchor";
+import { GetStaticPaths, GetStaticProps } from "next";
+import { Props as CodeBlockProps } from "@/components/CodeBlock";
+import { Props as InlineCodeProps } from "@/components/InlineCode";
+import { TallyButton } from "@/components/TallyButton";
 
 const components: Record<string, React.ElementType> = {
-  pre: CodeBlock,
+  Collapse,
   Image,
   Banner,
   Link,
   PriorityBoardingBanner,
-  h2: ({ id, children }) => (
-    <StyledHeadingH2 id={id}>
-      <StyledLinkIcon href={`#${id}`}>
-        <FeatherLinkIcon className="icon" size={20} />
-      </StyledLinkIcon>
-      <StyledLinkHeading href={`#${id}`}>{children[1]}</StyledLinkHeading>
-    </StyledHeadingH2>
-  ),
+  a: Anchor,
+  h2: H2,
+  h3: H3,
+  h4: H4,
+  TallyButton,
 };
 
-export default function PostPage({ page }: { page: Page }) {
+export default function PostPage({
+  page,
+  colorModeSSR,
+}: {
+  page: Page;
+  colorModeSSR: string | null;
+}) {
   const MDXContent = useMDXComponent(page.body.code);
+
+  // Create a new components object with the extra props
+  const componentsWithProps = {
+    ...components,
+    pre: (props: CodeBlockProps) => (
+      <CodeBlock {...props} colorModeSSR={colorModeSSR} />
+    ),
+    code: (props: InlineCodeProps) => (
+      <InlineCode {...props} colorModeSSR={colorModeSSR} />
+    ),
+  };
 
   return (
     <Layout
       frontMatter={{
         title: page.title,
+        description: page.description,
+        url: page.url,
       }}
     >
-      <MDXContent components={components} />
+      <MDXContent components={componentsWithProps} />
     </Layout>
   );
 }
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const page = allPages.find(
-    (page) =>
+    page =>
       page._raw.flattenedPath ===
-      (params?.slug as string[] | undefined)?.join("/")
+      (params?.slug as string[] | undefined)?.join("/"),
   );
 
   return {
@@ -103,7 +75,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const paths = allPages.map((page) => page.url);
+  const paths = allPages.map(page => page.url);
   return {
     paths,
     fallback: false,

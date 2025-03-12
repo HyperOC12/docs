@@ -1,24 +1,52 @@
 ---
 title: CLI API Reference
+description: Learn about the Railway CLI commands.
 ---
+The Railway Command Line Interface (CLI) lets you interact with your
+Railway project from the command line.
 
-The following commands are available in the CLI
+This document describes the commands available in the CLI.
+
+For information on how to install the CLI and more examples of usage, see the [CLI guide](/guides/cli).
 
 ## Add
 
-*Add a plugin to your project*
+*Add a service to your project*
 
 ```txt
 ~ railway add --help
-Add a new plugin to your project
+Add a service to your project
 
 Usage: railway add [OPTIONS]
 
 Options:
-  -p, --plugin <PLUGIN>  The name of the plugin to add [possible values: postgresql, mysql, redis, mongodb]
-      --json             Output in JSON format
-  -h, --help             Print help
-  -V, --version          Print version
+  -d, --database <DATABASE>
+          The name of the database to add
+
+          [possible values: postgres, mysql, redis, mongo]
+
+  -s, --service [<SERVICE>]
+          The name of the service to create (leave blank for randomly generated)
+
+  -r, --repo <REPO>
+          The repo to link to the service
+
+  -i, --image <IMAGE>
+          The docker image to link to the service
+
+  -v, --variables <VARIABLES>
+          The "{key}={value}" environment variable pair to set the service variables. Example:
+
+          railway add --service --variables "MY_SPECIAL_ENV_VAR=1" --variables "BACKEND_PORT=3000"
+
+      --json
+          Output in JSON format
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+  -V, --version
+          Print version
 ```
 
 ## Completion
@@ -41,16 +69,16 @@ Options:
 
 ## Connect
 
-*Connect to a plugin's shell (`psql` for Postgres, `mongosh` for MongoDB, etc.)*
+*Connect to a database's shell (`psql` for Postgres, `mongosh` for MongoDB, etc.)*
 
 ```txt
 ~ railway connect --help
-Connect to a plugin's shell (psql for Postgres, mongosh for MongoDB, etc.)
+Connect to a database's shell (psql for Postgres, mongosh for MongoDB, etc.)
 
-Usage: railway connect [OPTIONS] [PLUGIN_NAME]
+Usage: railway connect [OPTIONS] [SERVICE_NAME]
 
 Arguments:
-  [PLUGIN_NAME]  The name of the plugin to connect to
+  [SERVICE_NAME]  The name of the database to connect to
 
 Options:
   -e, --environment <ENVIRONMENT>  Environment to pull variables from (defaults to linked environment)
@@ -59,42 +87,54 @@ Options:
   -V, --version                    Print version
 ```
 
-This requires you to have the plugin's appropriate shell/client installed in your `$PATH`:
+This requires you to have the database's appropriate shell/client installed in your `$PATH`:
 
 * Postgres: `psql` (https://www.postgresql.org/docs/current/app-psql.html)
 * Redis: `redis-cli` (https://redis.io/docs/ui/cli/)
 * MongoDB: `mongosh` (https://www.mongodb.com/docs/mongodb-shell/)
 * MySQL: `mysql` (https://dev.mysql.com/doc/refman/8.0/en/mysql.html)
 
-## Delete
+## Deploy
 
-*Interactively delete a plugin*
+*Deploy a template into your project*
 
 ```txt
-~ railway delete --help
-Delete plugins from a project
+railway deploy --help
+Provisions a template into your project
 
-Usage: railway delete [OPTIONS]
+Usage: railway deploy [OPTIONS]
 
 Options:
-      --json     Output in JSON format
-  -h, --help     Print help
-  -V, --version  Print version
+  -t, --template <TEMPLATE>  The code of the template to deploy
+  -v, --variable <VARIABLE>  The "{key}={value}" environment variable pair to set the template variables
+          To specify the variable for a single service prefix it with "{service}." Example:
+          bash railway deploy -t postgres -v "MY_SPECIAL_ENV_VAR=1" -v "Backend.Port=3000"
+
+      --json                 Output in JSON format
+  -h, --help                 Print help (see a summary with '-h')
+  -V, --version              Print version
+
 ```
-You will be prompted to select a plugin to delete, and if you have 2FA enabled, you will be prompted to enter your 2FA code.
 
 ## Domain
+
 *Create a domain for a service*
+
 ```txt
 ~ railway domain --help
-Generates a domain for a service if there is not a railway provided domain
+Add a custom domain or generate a railway provided domain for a service
 
-Usage: railway domain [OPTIONS]
+Usage: railway domain [OPTIONS] [DOMAIN]
+
+Arguments:
+  [DOMAIN]  Optionally, specify a custom domain to use. If not specified, a domain will be generated
 
 Options:
-      --json     Output in JSON format
-  -h, --help     Print help
-  -V, --version  Print version
+  -p, --port <PORT>        The port to connect to the domain
+  -s, --service <SERVICE>  The name of the service to generate the domain for
+      --json               Output in JSON format
+  -h, --help               Print help (see more with '--help')
+  -V, --version            Print version
 ```
 
 ## Docs
@@ -132,14 +172,18 @@ Options:
 
 ## Environment
 
-*Change which environment you are using*
-
+*Create, delete or link an environment*
 
 ```txt
-~ railway environment --help
-Change the active environment
+~ railway [env]ironment --help
+Create, delete or link an environment
 
-Usage: railway environment [OPTIONS] [ENVIRONMENT]
+Usage: railway environment [OPTIONS] [ENVIRONMENT] [COMMAND]
+
+Commands:
+  new     Create a new environment
+  delete  Delete an environment [aliases: remove, rm]
+  help    Print this message or the help of the given subcommand(s)
 
 Arguments:
   [ENVIRONMENT]  The environment to link to
@@ -149,50 +193,72 @@ Options:
   -h, --help     Print help
   -V, --version  Print version
 ```
-View [environment docs](/develop/environments) for more information.
+View [environment docs](/reference/environments) for more information.
 
 If you run `railway environment` without specifying a name, you will be prompted
 with an environment selector that lists all your environments for the project.
 
-## Help
+### railway environment new
 
-*Help command reference*
+*Create a new environment*
 
 ```txt
-~ railway help
-Interact with Railway via CLI
+~ railway [env]ironment new --help
+Create a new environment
 
-Usage: railway [OPTIONS] <COMMAND>
+Usage: railway environment new [OPTIONS] [NAME]
 
-Commands:
-  add          Add a new plugin to your project
-  completion   Generate completion script
-  delete       Delete plugins from a project
-  domain       Generates a domain for a service if there is not a railway provided domain
-  docs         Open Railway Documentation in default browser
-  environment  Change the active environment
-  init         Create a new project
-  link         Associate existing project with current directory, may specify projectId as an argument
-  list         List all projects in your Railway account
-  login        Login to your Railway account
-  logout       Logout of your Railway account
-  logs         View the most-recent deploy's logs
-  open         Open your project dashboard
-  run          Run a local command using variables from the active environment
-  service      Link a service to the current project
-  shell        Open a subshell with Railway variables available
-  status       Show information about the current project
-  unlink       Disassociate project from current directory
-  up           Upload and deploy project from the current directory
-  variables    Show variables for active environment
-  whoami       Get the current logged in user
-  help         Print this message or the help of the given subcommand(s)
+Arguments:
+  [NAME]
+          The name of the environment to create
 
 Options:
+  -d, --duplicate <DUPLICATE>
+          The name of the environment to duplicate
+
+          [aliases: copy]
+          [short aliases: c]
+
+  -v, --service-variable <SERVICE> <VARIABLE>
+          Variables to assign in the new environment
+
+          Note: This will only work if the environment is being duplicated, and that the service specified is present in the original environment
+
+          Examples:
+
+          railway environment new foo --duplicate bar --service-variable <service name/service uuid> BACKEND_PORT=3000
+
+      --json
+          Output in JSON format
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+  -V, --version
+          Print version
+```
+
+### railway environment delete
+
+*Delete an environment*
+
+```txt
+~ railway [env]ironment delete --help
+Delete an environment
+
+Usage: railway environment delete [OPTIONS] [ENVIRONMENT]
+
+Arguments:
+  [ENVIRONMENT]  The environment to delete
+
+Options:
+  -y, --yes      Skip confirmation dialog
       --json     Output in JSON format
   -h, --help     Print help
   -V, --version  Print version
 ```
+
+**Note**: `railway environment delete` will not work if an account has 2FA and the terminal is not being run interactively.
 
 ## Init
 *Create a new Project from the CLI*
@@ -218,13 +284,13 @@ Options:
 ~ railway link --help
 Associate existing project with current directory, may specify projectId as an argument
 
-Usage: railway link [OPTIONS] [PROJECT_ID]
-
-Arguments:
-  [PROJECT_ID]  Project ID to link to
+Usage: railway link [OPTIONS]
 
 Options:
-      --environment <ENVIRONMENT>  Environment to link to
+  -e, --environment <ENVIRONMENT>  Environment to link to
+  -p, --project <PROJECT>          Project to link to
+  -s, --service <SERVICE>          The service to link to
+  -t, --team <TEAM>                The team to link to. Use "personal" for your personal account
       --json                       Output in JSON format
   -h, --help                       Print help
   -V, --version                    Print version
@@ -265,7 +331,7 @@ Options:
   -V, --version      Print version
 ```
 
-This will open the browser to `https://railway.app/cli-login`.
+This will open the browser to `https://railway.com/cli-login`.
 
 ### Browserless
 
@@ -277,10 +343,10 @@ perform a _browserless_ login.
 ~ railway login --browserless
 Browserless Login
 Please visit:
-  https://railway.app/cli-login?d=SGVsbG8sIGtpbmQgc3RyYW5nZXIhIFRoYW5rcyBmb3IgcmVhZGluZyB0aGUgZG9jdW1lbnRhdGlvbiEgSSBob3BlIHlvdSdyZSBoYXZpbmcgYSB3b25kZXJmdWwgZGF5IDopCg==
+  https://railway.com/cli-login?d=SGVsbG8sIGtpbmQgc3RyYW5nZXIhIFRoYW5rcyBmb3IgcmVhZGluZyB0aGUgZG9jdW1lbnRhdGlvbiEgSSBob3BlIHlvdSdyZSBoYXZpbmcgYSB3b25kZXJmdWwgZGF5IDopCg==
 Your pairing code is: friendly-malicious-electric-soup
 
-Logged in as Nebula (nebula@railway.app)
+Logged in as Nebula (nebula@railway.com)
 ```
 
 This will prompt you to go to a URL (you can copy and paste) and present you
@@ -318,7 +384,7 @@ Options:
   -b, --build       Show build logs
       --json        Output in JSON format
   -h, --help        Print help
-  -V, --version     Print versio
+  -V, --version     Print version
 ```
 
 ## Open
@@ -358,7 +424,7 @@ Options:
   -V, --version                    Print version
 ```
 
-This also injects all environment variables associated with the plugins you have
+This also injects all environment variables associated with the databases you have
 installed in your project.
 
 ## Service
@@ -443,11 +509,15 @@ Arguments:
   [PATH]
 
 Options:
-  -d, --detach             Don't attach to the log stream
-  -s, --service <SERVICE>  Service to deploy to (defaults to linked service)
-      --json               Output in JSON format
-  -h, --help               Print help
-  -V, --version            Print version
+  -d, --detach                     Don't attach to the log stream
+  -c, --ci                         Only stream build logs and exit after it's done
+  -s, --service <SERVICE>          Service to deploy to (defaults to linked service)
+  -e, --environment <ENVIRONMENT>  Environment to deploy to (defaults to linked environment)
+      --no-gitignore               Don't ignore paths from .gitignore
+      --verbose                    Verbose output
+      --json                       Output in JSON format
+  -h, --help                       Print help
+  -V, --version                    Print version
 ```
 If no path is provided, the top linked directory is deployed. The currently selected environment is used.
 
@@ -462,11 +532,14 @@ Show variables for active environment
 Usage: railway variables [OPTIONS]
 
 Options:
-  -s, --service <SERVICE>  Service to show variables for
-  -k, --kv                 Show variables in KV format
-      --json               Output in JSON format
-  -h, --help               Print help
-  -V, --version            Print version
+  -s, --service <SERVICE>          The service to show/set variables for
+  -e, --environment <ENVIRONMENT>  The environment to show/set variables for
+  -k, --kv                         Show variables in KV format
+      --set <SET>                  The "{key}={value}" environment variable pair to set the service variables. Example:
+                                      railway variables --set "MY_SPECIAL_ENV_VAR=1" --set "BACKEND_PORT=3000"
+      --json                       Output in JSON format
+  -h, --help                       Print help (see a summary with '-h')
+  -V, --version                    Print version
 ```
 
 ## Whoami
@@ -478,6 +551,95 @@ Options:
 Get the current logged in user
 
 Usage: railway whoami [OPTIONS]
+
+Options:
+      --json     Output in JSON format
+  -h, --help     Print help
+  -V, --version  Print version
+```
+
+## Volume
+
+*Manage project volumes with options to list, add, delete, update, attach, and detach volumes*
+
+```txt
+~ railway volume --help
+Manage project volumes
+
+Usage: railway volume [OPTIONS] <COMMAND>
+
+Commands:
+  list    List volumes
+  add     Add a new volume
+  delete  Delete a volume
+  update  Update a volume
+  detach  Detach a volume from a service
+  attach  Attach a volume to a service
+  help    Print this message or the help of the given subcommand(s)
+
+Options:
+  -s, --service <SERVICE>          Service ID
+  -e, --environment <ENVIRONMENT>  Environment ID
+      --json                       Output in JSON format
+  -h, --help                       Print help
+  -V, --version                    Print version
+```
+
+## Redeploy
+
+*Redeploy the currently deployed version of a service*
+
+```txt
+~ railway redeploy --help
+Redeploy the latest deployment of a service
+
+Usage: railway redeploy [OPTIONS]
+
+Options:
+  -s, --service <SERVICE>  The service ID/name to redeploy from
+  -y, --yes                Skip confirmation dialog
+      --json               Output in JSON format
+  -h, --help               Print help
+  -V, --version            Print version
+```
+
+## Help
+
+*Help command reference*
+
+```txt
+~ railway help
+Interact with Railway via CLI
+
+Usage: railway [OPTIONS] <COMMAND>
+
+Commands:
+  add          Add a service to your project
+  completion   Generate completion script
+  connect      Connect to a database's shell (psql for Postgres, mongosh for MongoDB, etc.)
+  deploy       Provisions a template into your project
+  domain       Generates a domain for a service if there is not a railway provided domain
+  docs         Open Railway Documentation in default browser
+  down         Remove the most recent deployment
+  environment  Change the active environment
+  init         Create a new project
+  link         Associate existing project with current directory, may specify projectId as an argument
+  list         List all projects in your Railway account
+  login        Login to your Railway account
+  logout       Logout of your Railway account
+  logs         View a deploy's logs
+  open         Open your project dashboard
+  run          Run a local command using variables from the active environment
+  service      Link a service to the current project
+  shell        Open a local subshell with Railway variables available
+  status       Show information about the current project
+  unlink       Disassociate project from current directory
+  up           Upload and deploy project from the current directory
+  variables    Show variables for active environment
+  whoami       Get the current logged in user
+  volume       Manage project volumes
+  redeploy     Redeploy the latest deployment of a service
+  help         Print this message or the help of the given subcommand(s)
 
 Options:
       --json     Output in JSON format

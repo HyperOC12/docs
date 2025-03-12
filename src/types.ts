@@ -1,5 +1,7 @@
 export interface FrontMatter {
   title: string;
+  description?: string;
+  url: string;
 }
 
 export type ISidebarContent = ISidebarSection[];
@@ -7,12 +9,23 @@ export type ISidebarContent = ISidebarSection[];
 export interface IPage {
   title: string;
   slug: string;
+  description?: string;
   category?: string;
+}
+
+export interface IExternalLink {
+  title: string;
+  url: string;
 }
 
 export interface ISidebarSection {
   title?: string;
-  pages: IPage[];
+  content: (IPage | ISubSection | IExternalLink)[];
+}
+
+export interface ISubSection {
+  subTitle: string | IPage;
+  pages: (IPage | IExternalLink)[];
 }
 
 export namespace Search {
